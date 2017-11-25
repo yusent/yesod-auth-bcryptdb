@@ -15,6 +15,9 @@ module Yesod.Auth.BCryptDB
   , authBCryptDBWithForm
   ) where
 
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative                   ((<$>), (<*>), pure)
+#endif
 import Crypto.BCrypt
 import Data.Aeson                            ((.:?))
 import qualified Data.ByteString.Char8 as BS (pack, unpack)
