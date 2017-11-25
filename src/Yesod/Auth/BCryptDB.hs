@@ -11,6 +11,7 @@ module Yesod.Auth.BCryptDB
   -- * Interface to database and Yesod.Auth
   , authBCryptDB
   , authBCryptDBWithForm
+  , submitRouteBcryptDB
   , validateCreds
   ) where
 
@@ -205,5 +206,17 @@ defaultForm loginRoute = do
           if (!("autofocus" in document.createElement("input"))) {
             document.getElementById("x").focus();
           }
-
   |]
+
+-- | The route, in the parent site, to which the username and password
+--   should be sent in order to log in.  This function is particularly
+--   useful in constructing a 'loginHandler' function which provides a
+--   JSON response.  See the \"JSON Interface\" section above for more
+--   details.
+--
+submitRouteBcryptDB
+  :: YesodAuth site
+  => HandlerT Auth (HandlerT site IO) (Route site)
+submitRouteBcryptDB = do
+    toParent <- getRouteToParent
+    return $ toParent login
