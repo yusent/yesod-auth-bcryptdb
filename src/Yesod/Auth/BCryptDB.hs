@@ -1,9 +1,9 @@
 {-# LANGUAGE ConstraintKinds   #-}
 {-# LANGUAGE CPP               #-}
 {-# LANGUAGE FlexibleContexts  #-}
-{-# LANGUAGE GADTs             #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE TypeFamilies      #-}
 
 module Yesod.Auth.BCryptDB
   ( BCryptDBUser(..)
