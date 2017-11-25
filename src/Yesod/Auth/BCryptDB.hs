@@ -103,7 +103,6 @@ type BCryptDBPersist master user =
   ( YesodAuthPersist master
   , PersistUnique (YesodPersistBackend master)
   , AuthEntity master ~ user
-  , AuthId master ~ Key user
 #if MIN_VERSION_persistent(2,5,0)
   , PersistEntityBackend user ~ BaseBackend (YesodPersistBackend master)
 #else
