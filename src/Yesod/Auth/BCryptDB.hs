@@ -29,6 +29,11 @@ import Yesod.Form
 import Yesod.Persist
 import Yesod.Auth.Message                    (AuthMessage(InvalidUsernamePass))
 
+#if !MIN_VERSION_yesod_core(1,4,14)
+defaultCsrfParamName :: Text
+defaultCsrfParamName = "_token"
+#endif
+
 type Password = Text
 
 -- | The type representing user information stored in the database should
