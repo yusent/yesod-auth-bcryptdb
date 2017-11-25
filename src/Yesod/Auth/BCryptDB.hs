@@ -7,12 +7,11 @@
 
 module Yesod.Auth.BCryptDB
   ( BCryptDBUser(..)
-  , Password
   , setPassword
-  , validateCreds
   -- * Interface to database and Yesod.Auth
   , authBCryptDB
   , authBCryptDBWithForm
+  , validateCreds
   ) where
 
 #if __GLASGOW_HASKELL__ < 710
