@@ -142,6 +142,7 @@
 module Yesod.Auth.BCryptDB
   ( BCryptDBUser(..)
   , setPassword
+  , setPasswordWithHashingPolicy
   -- * Interface to database and Yesod.Auth
   , authBCryptDB
   , authBCryptDBWithForm
@@ -198,10 +199,20 @@ saltAndHashPassword password hashingPolicy = do
 setPassword
   :: BCryptDBUser user
   => Text          -- ^ Password
-  -> HashingPolicy -- ^ @slowerBcryptHashingPolicy@ is recommended
   -> user
   -> IO user
-setPassword password hashingPolicy user = do
+setPassword = setPasswordWithHashingPolicy slowerBcryptHashingPolicy
+
+-- | Set password for user. This function should be used for setting passwords
+-- with an specified hashing policy. It generates random salt and calculates
+-- proper hashes.
+setPasswordWithHashingPolicy
+  :: BCryptDBUser user
+  => HashingPolicy
+  -> Text          -- ^ Password
+  -> user
+  -> IO user
+setPasswordWithHashingPolicy hashingPolicy password user = do
     mHash <- saltAndHashPassword password hashingPolicy
     return $ case mHash of
                   Nothing   -> user
