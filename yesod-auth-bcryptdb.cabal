@@ -1,14 +1,25 @@
 name:                yesod-auth-bcryptdb
 version:             0.1.0.0
-synopsis:            Yesod.Auth.BcryptDB plugin
-description:         Yesod.Auth.BcryptDB plugin
+synopsis:            Authentication plugin for Yesod.
+description:
+  This package provides authentication with passwords hashed and salted using
+  bcrypt which are stored in a database, and works best in situations where an
+  administrator is involved in setting up a user with an initial password.
+  .
+  The complete login process, including a default form, is implemented by
+  this plugin, but the application developer must design the interfaces
+  for setting up users and allowing them to change their own passwords,
+  since only the low-level password-setting functions are provided by this
+  package.  (Note that other authentication plugins may be more appropriate
+  if you wish to use email verification to set up accounts).
 homepage:            https://github.com/yusent/yesod-auth-bcryptdb
+bug-reports:         https://github.com/yusent/yesod-auth-bcryptdb/issues
 license:             MIT
 license-file:        LICENSE
 author:              Yusent Chig
-maintainer:          yusent@protonmail.com
+maintainer:          Yusent Chig <yusent@protonmail.com>
 copyright:           2017 Yusent Chig
-category:            Yesod Authentication
+category:            Web, Yesod
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
