@@ -168,8 +168,6 @@ defaultCsrfParamName :: Text
 defaultCsrfParamName = "_token"
 #endif
 
-type Password = Text
-
 -- | The type representing user information stored in the database should
 --   be an instance of this class.  It just provides the getter and setter
 --   used by the functions in this module.
@@ -190,14 +188,19 @@ class BCryptDBUser user where
   {-# MINIMAL setPasswordSaltedHash, userPasswordSaltedHash #-}
 
 -- | Calculate salted hash using Bcrypt.
-saltAndHashPassword :: Password -> HashingPolicy -> IO (Maybe Text)
+saltAndHashPassword :: Text -> HashingPolicy -> IO (Maybe Text)
 saltAndHashPassword password hashingPolicy = do
    hash <- hashPasswordUsingPolicy hashingPolicy . BS.pack $ unpack password
    return $ pack . BS.unpack <$> hash
 
 -- | Set password for user. This function should be used for setting
 --   passwords. It generates random salt and calculates proper hashes.
-setPassword :: BCryptDBUser user => Password -> HashingPolicy -> user -> IO user
+setPassword
+  :: BCryptDBUser user
+  => Text          -- ^ Password
+  -> HashingPolicy -- ^ @slowerBcryptHashingPolicy@ is recommended
+  -> user
+  -> IO user
 setPassword password hashingPolicy user = do
     mHash <- saltAndHashPassword password hashingPolicy
     return $ case mHash of
@@ -213,7 +216,7 @@ setPassword password hashingPolicy user = do
 validateCreds
   :: BCryptDBPersist master user
   => Unique user                 -- ^ User unique identifier
-  -> Password
+  -> Text                        -- ^ Password given
   -> HandlerT master IO Bool
 validateCreds userID password = do
   -- Checks that hash and password match
