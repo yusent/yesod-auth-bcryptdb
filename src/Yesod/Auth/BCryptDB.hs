@@ -38,7 +38,7 @@
 -- > ....
 -- > instance BcryptDBUser User where
 -- >     userPasswordSaltedHash = userPassword
--- >     setPasswordSaltedHash h u = u { userPassword = h }
+-- >     setPasswordSaltedHash h u = u { userPassword = Just h }
 --
 -- In the YesodAuth instance declaration for your app, include 'authBcryptDB'
 -- like so:
@@ -47,11 +47,12 @@
 -- > ....
 -- > instance YesodAuth App where
 -- >     ....
--- >     authPlugins _ = [ authBcryptDB UniqueUser, .... ]
+-- >     authPlugins _ = [authBcryptDB (Just . UniqueUser), ....]
 --
 -- The argument to 'authBcryptDB' is a function which takes a 'Text' and
--- produces a 'Unique' value to look up in the User table. The example
--- @UniqueUser@ shown here works for the model outlined above.
+-- produces a 'Maybe' containing a 'Unique' value to look up in the User
+-- table. The example @(Just . UniqueUser)@ shown here works for the model
+-- outlined above.
 --
 -- For a real application, the developer should provide some sort of
 -- of administrative interface for setting passwords; it needs to call
@@ -76,7 +77,7 @@
 --
 -- > instance YesodAuth App where
 -- >     ....
--- >     authPlugins _ = [ authBcryptDBWithForm myform UniqueUser, .... ]
+-- >     authPlugins _ = [authBcryptDBWithForm myform (Just . UniqueUser), ....]
 -- >
 -- > myform :: Route App -> Widget
 -- > myform action = $(whamletFile "templates/loginform.hamlet")
@@ -231,14 +232,15 @@ validateCreds
   -> HandlerT master IO Bool
 validateCreds userID password = do
   -- Checks that hash and password match
-  mUser <- runDB $ getBy userID
+  mPassword <- runDB $ fmap (userPasswordSaltedHash . entityVal)
+                   <$> getBy userID
 
-  return $ case mUser of
+  return $ case mPassword of
                 Nothing -> False
 
-                Just (Entity _ user) ->
+                Just storedPassword ->
                   validatePassword
-                    (BS.pack . unpack $ userPasswordSaltedHash user)
+                    (BS.pack $ unpack storedPassword)
                     (BS.pack $ unpack password)
 
 ----------------------------------------------------------------
@@ -274,7 +276,7 @@ login = PluginR "bcryptdb" ["login"]
 --   username (whatever it might be) to unique user ID.
 postLoginR
   :: BCryptDBPersist master user
-  => (Text -> Unique user)
+  => (Text -> Maybe (Unique user))
   -> HandlerT Auth (HandlerT master IO) TypedContent
 postLoginR uniq = do
   jsonContent <- fmap ((== "application/json") . simpleContentType)
@@ -288,7 +290,7 @@ postLoginR uniq = do
                           <*> iopt textField "password"
 
   isValid <- lift . fromMaybe (return False)
-                  $ validateCreds <$> fmap uniq mUser <*> mPass
+                  $ validateCreds <$> (uniq =<< mUser) <*> mPass
 
   if isValid
       then lift . setCredsRedirect $ Creds "bcryptdb" (fromMaybe "" mUser) []
@@ -298,7 +300,7 @@ postLoginR uniq = do
 --   which holds the username and a salted hash of the password
 authBCryptDB
   :: BCryptDBPersist master user
-  => (Text -> Unique user)
+  => (Text -> Maybe (Unique user))
   -> AuthPlugin master
 authBCryptDB = authBCryptDBWithForm defaultForm
 
@@ -315,7 +317,7 @@ authBCryptDB = authBCryptDBWithForm defaultForm
 authBCryptDBWithForm
   :: BCryptDBPersist master user
   => (Route master -> WidgetT master IO ())
-  -> (Text -> Unique user)
+  -> (Text -> Maybe (Unique user))
   -> AuthPlugin master
 authBCryptDBWithForm form uniq =
   AuthPlugin "bcryptdb" dispatch $ \tm -> form (tm login)
