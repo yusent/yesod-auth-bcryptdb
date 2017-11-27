@@ -185,7 +185,7 @@ class BCryptDBUser user where
   -- | Getter used by 'validatePass' and 'upgradePasswordHash' to
   --   retrieve the password hash from user data
   --
-  userPasswordSaltedHash :: user -> Text
+  userPasswordSaltedHash :: user -> Maybe Text
 
   {-# MINIMAL setPasswordSaltedHash, userPasswordSaltedHash #-}
 
@@ -232,10 +232,9 @@ validateCreds
   -> HandlerT master IO Bool
 validateCreds userID password = do
   -- Checks that hash and password match
-  mPassword <- runDB $ fmap (userPasswordSaltedHash . entityVal)
-                   <$> getBy userID
+  mUser <- runDB $ getBy userID
 
-  return $ case mPassword of
+  return $ case (userPasswordSaltedHash . entityVal =<< mUser) of
                 Nothing -> False
 
                 Just storedPassword ->
