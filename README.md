@@ -1,3 +1,5 @@
+[![Version](https://img.shields.io/hackage/v/yesod-auth-bcryptdb)](http://hackage.haskell.org/package/yesod-auth-bcryptdb)
+
 # Yesod.Auth.BcryptDB
 
 A **Yesod** authentication plugin designed to look users up in a **Persistent** database where the salted hash of their password is stored. This is based on **Yesod.Auth.HashDB** plugin, but it uses **BCrypt** to hash and salt the passwords.
