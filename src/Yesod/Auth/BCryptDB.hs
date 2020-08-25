@@ -234,7 +234,7 @@ validateCreds userID password = do
   -- Checks that hash and password match
   mUser <- runDB $ getBy userID
 
-  return $ case (userPasswordSaltedHash . entityVal =<< mUser) of
+  return $ case userPasswordSaltedHash . entityVal =<< mUser of
                 Nothing -> False
 
                 Just storedPassword ->
